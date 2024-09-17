@@ -8,7 +8,7 @@ main.append(windowsResult);
 
 function getFirstDateOfCurrentMonth() {
   const now = new Date(); // Получаем текущую дату
-  const firstDate = new Date(now.getFullYear(), now.getMonth(), 1)
+  const firstDate = new Date(now.getFullYear(), now.getMonth(), 2)
     .toISOString()
     .slice(0, 10); // Создаем новую дату, указывая год, месяц и день
   return firstDate; // Возвращаем первое число месяца
@@ -36,7 +36,7 @@ function rand(min, max, num) {
   }
 }
 
-function getRandomDateExcludingWeekends(startDate, endDate) {
+/*function getRandomDateExcludingWeekends(startDate, endDate) {
   const getRandomDate = (start, end) => {
     const randomTimestamp =
       Math.floor(Math.random() * (end - start + 1)) + start;
@@ -52,6 +52,34 @@ function getRandomDateExcludingWeekends(startDate, endDate) {
   do {
     randomDate = getRandomDate(startDate.getTime(), endDate.getTime());
   } while (isWeekend(randomDate));
+
+  return randomDate.toLocaleDateString("de-DE");
+}*/
+function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
+  const isWeekend = (date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Воскресенье (0) или Суббота (6)
+  };
+
+  const generateRandomDate = (start, end) => {
+    const randomTimestamp =
+      Math.floor(Math.random() * (end - start + 1)) + start;
+    return new Date(randomTimestamp);
+  };
+
+  if (existingDates.length >= (endDate - startDate) / (1000 * 60 * 60 * 24)) {
+    throw new Error("Все доступные даты уже использованы.");
+  }
+
+  let randomDate;
+  do {
+    randomDate = generateRandomDate(startDate.getTime(), endDate.getTime());
+  } while (
+    isWeekend(randomDate) ||
+    existingDates.includes(randomDate.toDateString())
+  );
+
+  existingDates.push(randomDate.toDateString()); // Сохраняем дату в массив существующих дат
 
   return randomDate.toLocaleDateString("de-DE");
 }
@@ -88,7 +116,8 @@ function createTable() {
   for (let i = 0; i < coli4 && sumIndex > 0; i++) {
     const start = new Date(dateOt);
     const end = new Date(dateDo);
-    const randomDate = getRandomDateExcludingWeekends(start, end);
+    let existingDates = [];
+
     const tr = document.createElement("tr");
     tbody.append(tr);
     if (i + 1 == coli4) {
@@ -96,7 +125,16 @@ function createTable() {
       tr.append(td1);
       const td2 = document.createElement("td");
       tr.append(td2);
-      td1.innerHTML = randomDate;
+      const randomDate = getRandomDateExcludingWeekends(
+        start,
+        end,
+        existingDates
+      );
+      try {
+        td1.innerHTML = randomDate;
+      } catch (error) {
+        td1.innerHTML = ` ${error.message}`;
+      }
       td2.innerHTML += ` ${sumIndex}`;
       break;
     }
@@ -108,11 +146,19 @@ function createTable() {
       tr.append(td1);
       const td2 = document.createElement("td");
       tr.append(td2);
-      td1.innerHTML = randomDate;
+      const randomDate = getRandomDateExcludingWeekends(
+        start,
+        end,
+        existingDates
+      );
+      try {
+        td1.innerHTML = randomDate;
+      } catch (error) {
+        td1.innerHTML = ` ${error.message}`;
+      }
       td2.innerHTML += ` ${number}`;
     }
   }
-  console.log(sumIndex);
 }
 
 buttonOk.addEventListener("click", createTable);
