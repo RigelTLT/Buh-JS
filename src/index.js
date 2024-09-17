@@ -113,11 +113,10 @@ function createTable() {
   th2.innerHTML = `Сумма`;
   const tbody = document.createElement("tbody");
   table.append(tbody);
+  let existingDates = [];
   for (let i = 0; i < coli4 && sumIndex > 0; i++) {
     const start = new Date(dateOt);
     const end = new Date(dateDo);
-    let existingDates = [];
-
     const tr = document.createElement("tr");
     tbody.append(tr);
     if (i + 1 == coli4) {
