@@ -68,7 +68,7 @@ function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
   };
 
   if (existingDates.length >= (endDate - startDate) / (1000 * 60 * 60 * 24)) {
-    throw new Error("Все доступные даты уже использованы.");
+    return "Все доступные даты уже использованы.";
   }
 
   let randomDate;
@@ -80,8 +80,9 @@ function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
   );
 
   existingDates.push(randomDate.toDateString()); // Сохраняем дату в массив существующих дат
+  // Сохраняем дату в массив
 
-  return randomDate.toLocaleDateString("de-DE");
+  return randomDate; //.toLocaleDateString("de-DE")
 }
 
 function createTable() {
@@ -114,26 +115,28 @@ function createTable() {
   const tbody = document.createElement("tbody");
   table.append(tbody);
   let existingDates = [];
+  let listDates = [];
+  const start = new Date(dateOt);
+  const end = new Date(dateDo);
   for (let i = 0; i < coli4 && sumIndex > 0; i++) {
-    const start = new Date(dateOt);
-    const end = new Date(dateDo);
+    const randomDate = getRandomDateExcludingWeekends(
+      start,
+      end,
+      existingDates
+    );
+    listDates.push(randomDate);
+  }
+  listDates.sort((a, b) => new Date(a) - new Date(b));
+  for (let i = 0; i < coli4 && sumIndex > 0; i++) {
     const tr = document.createElement("tr");
     tbody.append(tr);
+
     if (i + 1 == coli4) {
       const td1 = document.createElement("td");
       tr.append(td1);
       const td2 = document.createElement("td");
       tr.append(td2);
-      const randomDate = getRandomDateExcludingWeekends(
-        start,
-        end,
-        existingDates
-      );
-      try {
-        td1.innerHTML = randomDate;
-      } catch (error) {
-        td1.innerHTML = ` ${error.message}`;
-      }
+      td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
       td2.innerHTML += ` ${sumIndex}`;
       break;
     }
@@ -145,16 +148,8 @@ function createTable() {
       tr.append(td1);
       const td2 = document.createElement("td");
       tr.append(td2);
-      const randomDate = getRandomDateExcludingWeekends(
-        start,
-        end,
-        existingDates
-      );
-      try {
-        td1.innerHTML = randomDate;
-      } catch (error) {
-        td1.innerHTML = ` ${error.message}`;
-      }
+
+      td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
       td2.innerHTML += ` ${number}`;
     }
   }
