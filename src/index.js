@@ -55,7 +55,7 @@ function rand(min, max, num) {
 
   return randomDate.toLocaleDateString("de-DE");
 }*/
-function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
+/*function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
   const isWeekend = (date) => {
     const day = date.getDay();
     return day === 0 || day === 6; // Воскресенье (0) или Суббота (6)
@@ -68,6 +68,7 @@ function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
   };
 
   if (existingDates.length >= (endDate - startDate) / (1000 * 60 * 60 * 24)) {
+    throw new Error("Все доступные даты уже использованы.");
     return "Все доступные даты уже использованы.";
   }
 
@@ -83,6 +84,47 @@ function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
   // Сохраняем дату в массив
 
   return randomDate; //.toLocaleDateString("de-DE")
+}*/
+function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
+  const isWeekend = (date) => {
+    const day = date.getDay();
+    return day === 0 || day === 6; // Воскресенье (0) или Суббота (6)
+  };
+
+  const generateRandomDate = (start, end) => {
+    const randomTimestamp =
+      Math.floor(Math.random() * (end - start + 1)) + start;
+    return new Date(randomTimestamp);
+  };
+
+  // Проверка доступных рабочих дней в диапазоне
+  const totalDays = Math.floor((endDate - startDate) / (1000 * 60 * 60 * 24));
+  const availableDates = [];
+
+  for (let i = 0; i <= totalDays; i++) {
+    const currentDate = new Date(startDate);
+    currentDate.setDate(startDate.getDate() + i);
+    if (
+      !isWeekend(currentDate) &&
+      !existingDates.includes(currentDate.toDateString())
+    ) {
+      availableDates.push(currentDate);
+    }
+  }
+
+  // Если нет доступных рабочих дней, выдаем ошибку
+  if (availableDates.length === 0) {
+    throw new Error("Нет доступных рабочих дней.");
+  }
+
+  // Генерируем случайную дату из доступных
+  const randomIndex = Math.floor(Math.random() * availableDates.length);
+  const randomDate = availableDates[randomIndex];
+
+  // Сохраняем сгенерированную дату в массив существующих дат
+  existingDates.push(randomDate.toDateString());
+
+  return randomDate;
 }
 
 function createTable() {
@@ -119,12 +161,17 @@ function createTable() {
   const start = new Date(dateOt);
   const end = new Date(dateDo);
   for (let i = 0; i < coli4 && sumIndex > 0; i++) {
-    const randomDate = getRandomDateExcludingWeekends(
-      start,
-      end,
-      existingDates
-    );
-    listDates.push(randomDate);
+    try {
+      const randomDate = getRandomDateExcludingWeekends(
+        start,
+        end,
+        existingDates
+      );
+      listDates.push(randomDate);
+    } catch (error) {
+      console.error(error.message);
+      listDates.push(error.message);
+    }
   }
   listDates.sort((a, b) => new Date(a) - new Date(b));
   for (let i = 0; i < coli4 && sumIndex > 0; i++) {
@@ -136,7 +183,11 @@ function createTable() {
       tr.append(td1);
       const td2 = document.createElement("td");
       tr.append(td2);
-      td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
+      if (listDates[i] == "Нет доступных рабочих дней.") {
+        td1.innerHTML = listDates[i];
+      } else {
+        td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
+      }
       td2.innerHTML += ` ${sumIndex}`;
       break;
     }
@@ -149,7 +200,11 @@ function createTable() {
       const td2 = document.createElement("td");
       tr.append(td2);
 
-      td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
+      if (listDates[i] == "Нет доступных рабочих дней.") {
+        td1.innerHTML = listDates[i];
+      } else {
+        td1.innerHTML = new Date(listDates[i]).toLocaleDateString("de-DE");
+      }
       td2.innerHTML += ` ${number}`;
     }
   }
