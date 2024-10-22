@@ -27,12 +27,16 @@ datOt.value = getFirstDateOfCurrentMonth();
 datDo.value = getLastDateOfCurrentMonth();
 
 function rand(min, max, num) {
-  let sum =
-    Math.floor(Math.floor(Math.random() * (max - min + 1) + min) / num) * num;
-  if (sum >= min && sum <= max && sum % num == 0) {
-    return sum;
-  } else {
-    return rand(min, max, num);
+  try {
+    let sum =
+      Math.floor(Math.floor(Math.random() * (max - min + 1) + min) / num) * num;
+    if (sum >= min && sum <= max && sum % num == 0) {
+      return sum;
+    } else {
+      return rand(min, max, num);
+    }
+  } catch (err) {
+    windowsResult.innerHTML = "Ошибка в кратности";
   }
 }
 
@@ -130,6 +134,7 @@ function getRandomDateExcludingWeekends(startDate, endDate, existingDates) {
 function createTable() {
   const sum = document.querySelector(".sum").value;
   const sumOt = document.querySelector(".ot-sum").value;
+  const kratnost = document.querySelector(".katn").value;
   const sumDo = document.querySelector(".do-sum").value;
   const dateOt = document.querySelector(".ot-date").value;
   const dateDo = document.querySelector(".do-date").value;
@@ -192,7 +197,7 @@ function createTable() {
       break;
     }
 
-    let number = rand(sumOt, sumDo, 1000);
+    let number = rand(sumOt, sumDo, kratnost);
     sumIndex = sumIndex - number;
     if (sumIndex >= 0) {
       const td1 = document.createElement("td");
